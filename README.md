@@ -36,16 +36,20 @@ Confirm the service is running as expected.
 定义：wg安装目录一般为C:\Program Files\WireGuard\如果你安装到其他目录了，需要看视频自行修改配置文件
 定义：所有需要运行CMD或者powershell的地方均需要管理员权限运行
 
+
 1：导出WG配置文件
 将隧道导出为ZIP，解压ZIP文件，将.conf配置文件复制到wg安装目录
+
 
 3：安装守护程序
 把reload.bat/win.exe/win.xml复制到WG安装目录
 
 
+
 4：检查服务配置文件，检查重启脚本
 win.xml
 reload.bat（如果修改了文件，需要另存文件为ANSI编码，不要直接保存）
+
 
 5:安装守护服务
 运行cmd或者powershell,进入WG安装目录运行

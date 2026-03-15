@@ -1,10 +1,10 @@
 # WireGuard-Auto-Keepalive
 Stop Reconnecting Manually! WireGuard Auto-Keepalive Script
 
-
-
 Important Notes:
+
 Compatible with Windows.
+
 WireGuard Path: The default installation directory is C:\Program Files\WireGuard\. If you installed it elsewhere, please update the configuration paths as shown in the video.
 
 Permissions: All CMD or PowerShell commands MUST be executed with Administrator privileges.

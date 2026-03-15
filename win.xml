@@ -1,0 +1,9 @@
+<service>
+  <id>xware</id>
+  <name>WireGuard Watchdog Service</name>
+  <description>此服务用于监控 WireGuard 链路并在断开时自动重启</description>
+  <executable>C:\Program Files\WireGuard\reload.bat</executable>
+  <log mode="roll"></log>
+  <startmode>Automatic</startmode>
+  <onfailure action="restart" delay="10 sec"/>
+</service>

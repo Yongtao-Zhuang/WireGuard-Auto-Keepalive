@@ -38,23 +38,29 @@ Confirm the service is running as expected.
 
 
 1：导出WG配置文件
+
 将隧道导出为ZIP，解压ZIP文件，将.conf配置文件复制到wg安装目录
 
 
 3：安装守护程序
+
 把reload.bat/win.exe/win.xml复制到WG安装目录
 
 
 
 4：检查服务配置文件，检查重启脚本
 win.xml
+
 reload.bat（如果修改了文件，需要另存文件为ANSI编码，不要直接保存）
 
 
 5:安装守护服务
 运行cmd或者powershell,进入WG安装目录运行
 win.exe  install   （如果此处命令后报错，可提供截图请求帮助，或者自行AI解决）
+
 win.exe start 
+
 win.exe status
+
 
 6:验证

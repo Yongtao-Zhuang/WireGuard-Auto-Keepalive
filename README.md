@@ -39,9 +39,13 @@ win.xml: The service configuration file. You can define service parameters here 
 
 
 25.conf是我的wg配置示例
-reload。bat是重启脚本，你可以在里面定义重启参数
+
+reload.bat是重启脚本，你可以在里面定义重启参数
+
 win.xml 是服务生成脚本，你可以在这里定义服务参数，并设定服务自动运行
+
 定义：wg安装目录一般为C:\Program Files\WireGuard\如果你安装到其他目录了，需要看视频自行修改配置文件
+
 定义：所有需要运行CMD或者powershell的地方均需要管理员权限运行
 
 1：导出WG配置文件

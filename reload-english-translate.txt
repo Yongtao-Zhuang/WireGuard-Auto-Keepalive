@@ -1,0 +1,102 @@
+@echo off
+:: Use GBK encoding for Chinese Windows compatibility (Change to chcp 65001 for UTF-8 if needed)
+chcp 936 >nul
+setlocal enabledelayedexpansion
+
+:: ================= CONFIGURATION =================
+:: [CRITICAL] Target IP to ping (e.g., the remote gateway of the WG tunnel).
+:: If this IP is unreachable, the script will trigger a restart.
+set "TARGET_IP=5.5.5.1"
+
+:: [CRITICAL] Tunnel Name (Must match your .conf filename).
+set "TUN_NAME=25"
+
+:: Service Name (Internal Windows Service ID, do not modify).
+set "WG_SERVICE=WireGuardTunnel$%TUN_NAME%"
+
+:: [CRITICAL] Check interval in seconds (Default: 30s).
+set "INTERVAL=30"
+
+:: [CRITICAL] Absolute path to your .conf file.
+set "CONF_PATH=C:\Program Files\WireGuard\25.conf"
+
+:: [CRITICAL] Path to the WireGuard executable.
+set "WG_EXE=C:\Program Files\WireGuard\wireguard.exe"
+
+:: Default log file location.
+set "LOG_FILE=%TEMP%\WG_Watchdog.log"
+:: =================================================
+
+:: Admin Privilege Check
+net session >nul 2>&1
+if %errorLevel% neq 0 (
+    echo [ERROR] Please run this script as Administrator!
+    pause
+    exit
+)
+
+:: Initialize Log
+echo [%date% %time%] Watchdog Service Started > "%LOG_FILE%"
+
+title WG-Watchdog 
+
+echo ========================================
+echo    WireGuard Watchdog Daemon
+echo ========================================
+echo    Target IP: %TARGET_IP%
+echo    Log Path:  %LOG_FILE%
+echo ========================================
+
+:LOOP
+title [Monitoring] Last Check: %time%
+echo [%time%] Checking %TARGET_IP%...
+
+:: --- Step 1: Check if WireGuard Service exists ---
+sc query "%WG_SERVICE%" >nul 2>&1
+if %errorlevel% neq 0 (
+    echo %date% %time% --- Service missing, attempting to install >> "%LOG_FILE%"
+    echo [%time%] WARNING: Service %WG_SERVICE% not found. Reinstalling...
+    
+    :: Execute install command
+    "%WG_EXE%" /installtunnelservice "%CONF_PATH%"
+    
+    if !errorlevel! equ 0 (
+        echo [%time%] Installation command sent. Initializing...
+        timeout /t 5 /nobreak >nul
+    ) else (
+        echo %date% %time% --- Installation failed. Check paths >> "%LOG_FILE%"
+        echo [%time%] ERROR: Failed to install service. Verify config path.
+    )
+)
+
+:: --- Step 2: Execute Network Connectivity Test ---
+ping -n 2 -w 2000 %TARGET_IP%
+
+if %errorlevel% neq 0 (
+    echo %date% %time% --- Connection lost. Restarting... >> "%LOG_FILE%"
+    echo [%time%] !!! Link down! Attempting to restart service !!!
+    
+    :: Stop and restart service
+    net stop "%WG_SERVICE%" >nul 2>&1
+    timeout /t 2 /nobreak >nul
+    net start "%WG_SERVICE%"
+    
+    if !errorlevel! equ 0 (
+        echo [%time%] Restart successful.
+        timeout /t 10 /nobreak >nul
+    ) else (
+        echo [%time%] Failed to start service. Forcing reinstallation...
+        :: Force uninstall and reinstall if start fails
+        "%WG_EXE%" /uninstalltunnelservice "%TUN_NAME%" >nul 2>&1
+        timeout /t 2 /nobreak >nul
+        "%WG_EXE%" /installtunnelservice "%CONF_PATH%"
+        echo %date% %time% --- Startup failed. Triggered forced reinstall >> "%LOG_FILE%"
+    )
+) else (
+    echo %date% %time% ----- Connection OK >> "%LOG_FILE%"
+    echo [%time%] Status: Healthy.
+)
+
+:: Wait for the next cycle
+timeout /t %INTERVAL% /nobreak >nul
+goto LOOP
